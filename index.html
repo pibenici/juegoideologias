@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Juego de las Ideologías</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -10,48 +10,48 @@
         :root { --bg: #fdfaf5; --accent: #7c9082; --text: #333; --line: #d1d1d1; }
         * { box-sizing: border-box; touch-action: manipulation; }
         
-        body, html { 
+        html, body { 
             height: 100%; margin: 0; padding: 0;
             font-family: 'Quicksand', sans-serif; background-color: var(--bg);
-            overflow: hidden; /* Prohibido el scroll */
+            overflow: hidden; position: fixed; width: 100%;
         }
 
         /* Pantalla 1 */
         #screen-setup {
             display: flex; flex-direction: column; align-items: center;
-            padding: 40px 20px; text-align: center; height: 100%;
+            padding: 30px 20px; text-align: center; height: 100%;
         }
         .input-group { display: flex; gap: 8px; width: 100%; max-width: 350px; margin-bottom: 20px; }
-        input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-family: inherit; }
+        input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-family: inherit; font-size: 16px; /* Evita zoom en iOS */ }
         .name-tag { display: inline-block; background: #eee; padding: 5px 12px; border-radius: 8px; margin: 4px; font-size: 0.8rem; }
 
         /* Pantalla 2 */
         #screen-game { 
-            display: none; height: 100vh; width: 100vw;
-            flex-direction: column;
+            display: none; height: 100%; width: 100%;
+            flex-direction: column; justify-content: space-between;
         }
 
         #export-area {
-            flex: 1; /* Toma todo el espacio disponible menos los botones */
+            flex-grow: 1;
             display: flex; align-items: center; justify-content: center;
-            position: relative; padding: 20px;
+            position: relative; padding: 10px;
+            overflow: hidden;
         }
 
         .map-wrapper {
             position: relative;
-            width: 90vw; height: 90vw; /* Cuadrado basado en el ancho */
-            max-width: 500px; max-height: 500px;
-            background: white; border-radius: 4px;
+            width: 88vw; height: 88vw;
+            max-width: 450px; max-height: 450px;
+            background: white; border: 1px solid #eee;
         }
 
-        .axis-h { position: absolute; top: 50%; width: 100%; height: 1.5px; background: var(--line); }
-        .axis-v { position: absolute; left: 50%; height: 100%; width: 1.5px; background: var(--line); }
+        .axis-h { position: absolute; top: 50%; width: 100%; height: 1.5px; background: var(--line); pointer-events: none; }
+        .axis-v { position: absolute; left: 50%; height: 100%; width: 1.5px; background: var(--line); pointer-events: none; }
 
-        /* Etiquetas internas con fondo para legibilidad */
         .label {
-            position: absolute; font-weight: 700; font-size: 0.7rem;
-            text-transform: uppercase; color: #888; background: var(--bg);
-            padding: 2px 6px; border-radius: 4px; z-index: 5;
+            position: absolute; font-weight: 700; font-size: 0.65rem;
+            text-transform: uppercase; color: #888; background: rgba(253, 250, 245, 0.9);
+            padding: 2px 4px; border-radius: 3px; z-index: 5; pointer-events: none;
         }
         .top { top: 5px; left: 50%; transform: translateX(-50%); color: #4a90e2; }
         .bottom { bottom: 5px; left: 50%; transform: translateX(-50%); color: #e67e22; }
@@ -61,34 +61,40 @@
         .player-chip {
             position: absolute; padding: 6px 12px; background: white;
             border: 1.5px solid var(--accent); border-radius: 20px;
-            font-weight: 600; font-size: 0.85rem; cursor: move;
-            z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600; font-size: 0.8rem; cursor: move;
+            z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             white-space: nowrap; touch-action: none;
         }
 
         .controls {
-            height: 80px; display: flex; justify-content: center;
-            align-items: center; gap: 10px; padding-bottom: 10px;
+            height: 100px; /* Espacio fijo y generoso para botones */
+            display: flex; flex-direction: column; gap: 8px;
+            justify-content: center; align-items: center;
+            padding-bottom: env(safe-area-inset-bottom); /* Soporte para iPhone notch */
+            background: var(--bg);
         }
 
+        .row-btns { display: flex; gap: 10px; width: 100%; justify-content: center; }
+
         button {
-            padding: 12px 20px; background: var(--accent); color: white;
+            padding: 12px 24px; background: var(--accent); color: white;
             border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+            font-family: inherit;
         }
-        .btn-start { width: 100%; max-width: 350px; }
-        .btn-alt { background: #666; font-size: 0.8rem; }
+        .btn-start { width: 100%; max-width: 300px; }
+        .btn-alt { background: #888; font-size: 0.75rem; padding: 8px 16px; }
     </style>
 </head>
 <body>
 
 <div id="screen-setup">
-    <h2 style="margin-top:0">Juego de las ideologías</h2>
+    <h2 style="margin-bottom: 10px;">Juego de las ideologías</h2>
     <div class="input-group">
         <input type="text" id="nameInput" placeholder="Nombre...">
         <button onclick="addName()">+</button>
     </div>
     <div id="nameList"></div>
-    <div style="flex:1"></div> <!-- Empuja el botón abajo -->
+    <div style="flex:1"></div>
     <button id="btnStart" class="btn-start" onclick="startGame()" disabled>Empezar</button>
 </div>
 
@@ -105,7 +111,7 @@
     </div>
     
     <div class="controls">
-        <button onclick="download()">📸 Guardar</button>
+        <button onclick="download()" style="width: 200px;">📸 Guardar Imagen</button>
         <button class="btn-alt" onclick="location.reload()">Reiniciar</button>
     </div>
 </div>
@@ -133,7 +139,7 @@
             const div = document.createElement('div');
             div.className = 'player-chip';
             div.innerText = name;
-            // Repartir un poco las fichas al inicio para que no se pisen todas
+            // Distribución inicial para evitar que se amontonen
             div.style.left = '10px';
             div.style.top = (10 + (i * 35)) + 'px';
             initDrag(div);
@@ -164,13 +170,12 @@
             const dy = y - cy;
             x = cx; y = cy;
             
-            // Límites para que no se escapen del cuadro
-            let newTop = el.offsetTop - dy;
-            let newLeft = el.offsetLeft - dx;
-            const parent = el.parentElement;
+            let nt = el.offsetTop - dy;
+            let nl = el.offsetLeft - dx;
+            const p = el.parentElement;
             
-            if(newTop > 0 && newTop < (parent.offsetHeight - el.offsetHeight)) el.style.top = newTop + "px";
-            if(newLeft > 0 && newLeft < (parent.offsetWidth - el.offsetWidth)) el.style.left = newLeft + "px";
+            if(nt > 0 && nt < (p.offsetHeight - el.offsetHeight)) el.style.top = nt + "px";
+            if(nl > 0 && nl < (p.offsetWidth - el.offsetWidth)) el.style.left = nl + "px";
         }
 
         function stop() {
@@ -181,10 +186,14 @@
 
     function download() {
         const area = document.getElementById('export-area');
-        html2canvas(area, { backgroundColor: "#fdfaf5", scale: 2 }).then(canvas => {
+        html2canvas(area, { 
+            backgroundColor: "#fdfaf5", 
+            scale: 2,
+            useCORS: true 
+        }).then(canvas => {
             const a = document.createElement('a');
-            a.download = 'ideologia-grupo.png';
-            a.href = canvas.toDataURL();
+            a.download = 'nuestras-ideologias.png';
+            a.href = canvas.toDataURL("image/png");
             a.click();
         });
     }
