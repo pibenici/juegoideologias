@@ -3,113 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Axial: El Juego del Grupo</title>
+    <title>Juego de las Ideologías</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --bg: #f8fafc; --primary: #1e293b; --accent: #3b82f6; }
-        body { font-family: sans-serif; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { width: 100%; max-width: 700px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .setup { margin-bottom: 20px; text-align: center; }
-        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 60%; }
-        button { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; }
-        
-        /* El Mapa */
-        #capture-area { position: relative; width: 100%; aspect-ratio: 1 / 1; background: #fff; border: 2px solid #333; margin: 20px 0; overflow: hidden; }
-        .axis-x { position: absolute; top: 50%; width: 100%; height: 2px; background: #333; }
-        .axis-y { position: absolute; left: 50%; height: 100%; width: 2px; background: #333; }
-        .label { position: absolute; font-weight: bold; font-size: 14px; text-transform: uppercase; }
-        .p { top: 10px; left: 50%; transform: translateX(-50%); color: blue; }
-        .ap { bottom: 10px; left: 50%; transform: translateX(-50%); color: red; }
-        .izq { left: 10px; top: 50%; transform: translateY(-50%); }
-        .der { right: 10px; top: 50%; transform: translateY(-50%); }
+        :root {
+            --bg-warm: #fdfaf5;
+            --accent: #7c9082; /* Verde musgo suave */
+            --text: #4a4a4a;
+            --card: #ffffff;
+            --shadow: 0 8px 30px rgba(0,0,0,0.05);
+        }
 
-        /* Las fichas */
-        .chip { position: absolute; padding: 6px 12px; background: #3b82f6; color: white; border-radius: 20px; cursor: move; font-size: 13px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .inventory { display: flex; flex-wrap: wrap; gap: 8px; padding: 15px; border: 2px dashed #cbd5e1; border-radius: 8px; min-height: 50px; }
-        .controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-warm);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 95%;
+            max-width: 800px;
+            background: var(--card);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        h1 { font-weight: 700; color: var(--text); margin-bottom: 30px; font-size: 2.2rem; }
+
+        /* Pantalla 1: Ingreso de Nombres */
+        #screen-setup .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        input {
+            padding: 15px 20px;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 300px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        button {
+            padding: 15px 25px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:active { transform: scale(0.95); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .name-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 50px;
+        }
+
+        .name-tag {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Pantalla 2: El Juego */
+        #screen-game { display: none; }
+
+        #map-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: white;
+            margin: 40px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* La Cruz central */
+        .cross-x { position: absolute; width: 100%; height: 1px; background: #d1d1d1; }
+        .cross-y { position: absolute; height: 100%; width: 1px; background: #d1d1d1; }
+
+        /* Etiquetas de los ejes - Posicionadas para no pisar la cruz */
+        .label {
+            position: absolute;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+        }
+
+        .label.top { top: -30px; color: #4a90e2; } /* Azul suave */
+        .label.bottom { bottom: -30px; color: #e67e22; } /* Naranja suave */
+        .label.left { left: -80px; }
+        .label.right { right: -80px; }
+
+        /* Fichas arrastrables */
+        .player-chip {
+            position: absolute;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 2px solid var(--accent);
+            color: var(--text);
+            border-radius: 50px;
+            cursor: grab;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            user-select: none;
+            z-index: 10;
+        }
+
+        .player-chip:active { cursor: grabbing; transform: scale(1.05); }
+
+        .footer-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .label.left { left: 0; top: 45%; }
+            .label.right { right: 0; top: 45%; }
+            .app-container { padding: 20px; }
+            h1 { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="setup">
-        <h2>Mapa Político del Grupo</h2>
-        <input type="text" id="nameIn" placeholder="Nombre del amigo...">
-        <button onclick="add()">Añadir</button>
+<div class="app-container">
+    <h1>Juego de las ideologías</h1>
+
+    <div id="screen-setup">
+        <p>Introduce los nombres de los integrantes del grupo</p>
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Ej: Juan" onkeypress="if(event.key==='Enter') addName()">
+            <button onclick="addName()">Añadir</button>
+        </div>
+        <div class="name-list" id="nameList"></div>
+        <button id="btnStart" style="margin-top: 20px; background: #4a4a4a; min-width: 200px;" onclick="startGame()" disabled>Empezar</button>
     </div>
 
-    <div id="capture-area">
-        <div class="axis-x"></div><div class="axis-y"></div>
-        <div class="label p">Peronismo</div>
-        <div class="label ap">Antiperonismo</div>
-        <div class="label izq">Izquierda</div>
-        <div class="label der">Derecha</div>
+    <div id="screen-game">
+        <div id="export-area" style="padding: 40px; background: white;">
+            <h2 id="game-title" style="margin-top:0; color: #4a4a4a;">Nuestra Ideología</h2>
+            <div id="map-container">
+                <div class="cross-x"></div>
+                <div class="cross-y"></div>
+                
+                <div class="label top">Peronismo</div>
+                <div class="label bottom">Antiperonismo</div>
+                <div class="label left">Izquierda</div>
+                <div class="label right">Derecha</div>
+                
+                </div>
         </div>
 
-    <div class="inventory" id="box"></div>
-
-    <div class="controls">
-        <button style="background:#22c55e" onclick="save()">📸 Descargar Imagen</button>
-        <button style="background:#64748b" onclick="location.reload()">Limpiar todo</button>
+        <div class="footer-controls">
+            <button onclick="downloadImage()" style="background: #7c9082;">📸 Guardar y Compartir</button>
+            <button onclick="location.reload()" style="background: #e5e5e5; color: #666;">Reiniciar</button>
+        </div>
     </div>
 </div>
 
 <script>
-    function add() {
-        const val = document.getElementById('nameIn').value;
-        if(!val) return;
-        const div = document.createElement('div');
-        div.className = 'chip';
-        div.innerText = val;
-        div.style.position = 'relative'; // Empiezan en la caja
-        makeDrag(div);
-        document.getElementById('box').appendChild(div);
-        document.getElementById('nameIn').value = '';
+    let players = [];
+
+    function addName() {
+        const input = document.getElementById('nameInput');
+        const name = input.value.trim();
+        if (name && !players.includes(name)) {
+            players.push(name);
+            renderNames();
+            input.value = '';
+            document.getElementById('btnStart').disabled = false;
+        }
     }
 
-    function makeDrag(el) {
-        let x = 0, y = 0;
-        el.onmousedown = dragStart;
-        el.ontouchstart = dragStart;
+    function renderNames() {
+        const list = document.getElementById('nameList');
+        list.innerHTML = players.map(p => `<div class="name-tag">${p}</div>`).join('');
+    }
 
-        function dragStart(e) {
-            e.preventDefault();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
-            x = clientX; y = clientY;
-            document.onmousemove = dragging;
-            document.ontouchmove = dragging;
-            document.onmouseup = () => document.onmousemove = document.onmouseup = null;
-            document.ontouchend = () => document.ontouchmove = document.ontouchend = null;
+    function startGame() {
+        document.getElementById('screen-setup').style.display = 'none';
+        const gameScreen = document.getElementById('screen-game');
+        gameScreen.style.display = 'block';
+        
+        const container = document.getElementById('map-container');
+        
+        players.forEach((name, index) => {
+            const chip = document.createElement('div');
+            chip.className = 'player-chip';
+            chip.innerText = name;
             
-            // Si está en la caja, lo movemos al mapa para que sea absoluto
-            if(el.parentElement.id === 'box') {
-                const rect = el.getBoundingClientRect();
-                const map = document.getElementById('capture-area').getBoundingClientRect();
-                document.getElementById('capture-area').appendChild(el);
-                el.style.position = 'absolute';
-                el.style.left = (rect.left - map.left) + 'px';
-                el.style.top = (rect.top - map.top) + 'px';
-            }
-        }
+            // Posición inicial aleatoria cerca del centro para que no se pisen
+            const offset = (index * 15) % 50;
+            chip.style.left = `calc(50% - 40px + ${offset}px)`;
+            chip.style.top = `calc(50% - 20px + ${offset}px)`;
+            
+            makeDraggable(chip);
+            container.appendChild(chip);
+        });
+    }
 
-        function dragging(e) {
+    function makeDraggable(el) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        
+        el.onmousedown = dragMouseDown;
+        el.ontouchstart = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e = e || window.event;
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
-            el.style.left = (el.offsetLeft + (clientX - x)) + 'px';
-            el.style.top = (el.offsetTop + (clientY - y)) + 'px';
-            x = clientX; y = clientY;
+            pos3 = clientX;
+            pos4 = clientY;
+            document.onmouseup = closeDragElement;
+            document.ontouchend = closeDragElement;
+            document.onmousemove = elementDrag;
+            document.ontouchmove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            pos1 = pos3 - clientX;
+            pos2 = pos4 - clientY;
+            pos3 = clientX;
+            pos4 = clientY;
+            el.style.top = (el.offsetTop - pos2) + "px";
+            el.style.left = (el.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+            document.ontouchend = null;
+            document.ontouchmove = null;
         }
     }
 
-    function save() {
-        html2canvas(document.getElementById('capture-area')).then(canvas => {
+    function downloadImage() {
+        const area = document.getElementById('export-area');
+        html2canvas(area, { backgroundColor: "#ffffff" }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'nuestro-mapa.png';
+            link.download = 'juego-ideologias.png';
             link.href = canvas.toDataURL();
             link.click();
         });
     }
 </script>
+
 </body>
 </html>
