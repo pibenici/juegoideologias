@@ -7,151 +7,89 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root {
-            --bg: #fdfaf5;
-            --accent: #7c9082;
-            --text: #333;
-            --line: #d1d1d1;
-        }
-
+        :root { --bg: #fdfaf5; --accent: #7c9082; --text: #333; --line: #d1d1d1; }
         * { box-sizing: border-box; touch-action: manipulation; }
-
-        body {
-            font-family: 'Quicksand', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+        
+        body, html { 
+            height: 100%; margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif; background-color: var(--bg);
+            overflow: hidden; /* Prohibido el scroll */
         }
-
-        h1 { font-weight: 700; margin: 20px 0; font-size: 1.5rem; }
 
         /* Pantalla 1 */
         #screen-setup {
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            margin-top: 50px;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px 20px; text-align: center; height: 100%;
         }
+        .input-group { display: flex; gap: 8px; width: 100%; max-width: 350px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-family: inherit; }
+        .name-tag { display: inline-block; background: #eee; padding: 5px 12px; border-radius: 8px; margin: 4px; font-size: 0.8rem; }
 
-        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
-        input {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            flex-grow: 1;
-            font-family: inherit;
-        }
-
-        .name-tag {
-            display: inline-block;
-            background: #eee;
-            padding: 5px 12px;
-            border-radius: 8px;
-            margin: 4px;
-            font-size: 0.9rem;
-        }
-
-        button {
-            padding: 12px 20px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        /* Pantalla 2: El Juego */
+        /* Pantalla 2 */
         #screen-game { 
-            display: none; 
-            width: 100vw; 
-            height: 100vh;
-            position: fixed;
-            top: 0; left: 0;
-            background: var(--bg);
+            display: none; height: 100vh; width: 100vw;
+            flex-direction: column;
         }
 
         #export-area {
-            position: relative;
-            width: 100%;
-            height: calc(100% - 80px); /* Espacio para botones abajo */
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex: 1; /* Toma todo el espacio disponible menos los botones */
+            display: flex; align-items: center; justify-content: center;
+            position: relative; padding: 20px;
         }
 
-        /* El Mapa (Cruz) */
         .map-wrapper {
             position: relative;
-            width: 85vw;
-            height: 85vw;
-            max-width: 600px;
-            max-height: 600px;
+            width: 90vw; height: 90vw; /* Cuadrado basado en el ancho */
+            max-width: 500px; max-height: 500px;
+            background: white; border-radius: 4px;
         }
 
-        .axis-h { position: absolute; top: 50%; width: 100%; height: 2px; background: var(--line); z-index: 1; }
-        .axis-v { position: absolute; left: 50%; height: 100%; width: 2px; background: var(--line); z-index: 1; }
+        .axis-h { position: absolute; top: 50%; width: 100%; height: 1.5px; background: var(--line); }
+        .axis-v { position: absolute; left: 50%; height: 100%; width: 1.5px; background: var(--line); }
 
-        /* Etiquetas fuera de los ejes */
+        /* Etiquetas internas con fondo para legibilidad */
         .label {
-            position: absolute;
-            font-weight: 700;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            color: #999;
-            z-index: 2;
+            position: absolute; font-weight: 700; font-size: 0.7rem;
+            text-transform: uppercase; color: #888; background: var(--bg);
+            padding: 2px 6px; border-radius: 4px; z-index: 5;
         }
-        .top { top: -25px; left: 50%; transform: translateX(-50%); color: #4a90e2; }
-        .bottom { bottom: -25px; left: 50%; transform: translateX(-50%); color: #e67e22; }
-        .left { left: -10px; top: 50%; transform: translate(-100%, -50%); }
-        .right { right: -10px; top: 50%; transform: translate(100%, -50%); }
+        .top { top: 5px; left: 50%; transform: translateX(-50%); color: #4a90e2; }
+        .bottom { bottom: 5px; left: 50%; transform: translateX(-50%); color: #e67e22; }
+        .left { left: 5px; top: 50%; transform: translateY(-50%); }
+        .right { right: 5px; top: 50%; transform: translateY(-50%); }
 
-        /* Fichas */
         .player-chip {
-            position: absolute;
-            padding: 8px 16px;
-            background: white;
-            border: 2px solid var(--accent);
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: move;
-            z-index: 10;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            white-space: nowrap;
-            touch-action: none; /* BLOQUEA EL SCROLL AL MOVER */
+            position: absolute; padding: 6px 12px; background: white;
+            border: 1.5px solid var(--accent); border-radius: 20px;
+            font-weight: 600; font-size: 0.85rem; cursor: move;
+            z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            white-space: nowrap; touch-action: none;
         }
 
         .controls {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            z-index: 20;
+            height: 80px; display: flex; justify-content: center;
+            align-items: center; gap: 10px; padding-bottom: 10px;
         }
 
-        .btn-small { padding: 10px 15px; font-size: 0.8rem; background: #555; }
+        button {
+            padding: 12px 20px; background: var(--accent); color: white;
+            border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+        }
+        .btn-start { width: 100%; max-width: 350px; }
+        .btn-alt { background: #666; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <div id="screen-setup">
-    <h1>Juego de las ideologías</h1>
+    <h2 style="margin-top:0">Juego de las ideologías</h2>
     <div class="input-group">
         <input type="text" id="nameInput" placeholder="Nombre...">
         <button onclick="addName()">+</button>
     </div>
-    <div id="nameList" style="margin-bottom: 20px;"></div>
-    <button id="btnStart" onclick="startGame()" style="width:100%" disabled>Empezar Juego</button>
+    <div id="nameList"></div>
+    <div style="flex:1"></div> <!-- Empuja el botón abajo -->
+    <button id="btnStart" class="btn-start" onclick="startGame()" disabled>Empezar</button>
 </div>
 
 <div id="screen-game">
@@ -167,8 +105,8 @@
     </div>
     
     <div class="controls">
-        <button onclick="download()">📸 Guardar Imagen</button>
-        <button class="btn-small" onclick="location.reload()">Reiniciar</button>
+        <button onclick="download()">📸 Guardar</button>
+        <button class="btn-alt" onclick="location.reload()">Reiniciar</button>
     </div>
 </div>
 
@@ -188,15 +126,16 @@
 
     function startGame() {
         document.getElementById('screen-setup').style.display = 'none';
-        document.getElementById('screen-game').style.display = 'block';
+        document.getElementById('screen-game').style.display = 'flex';
         const map = document.getElementById('map');
         
         players.forEach((name, i) => {
             const div = document.createElement('div');
             div.className = 'player-chip';
             div.innerText = name;
-            div.style.left = '40%';
-            div.style.top = (20 + (i * 40)) + 'px'; // Los apila un poco al inicio
+            // Repartir un poco las fichas al inicio para que no se pisen todas
+            div.style.left = '10px';
+            div.style.top = (10 + (i * 35)) + 'px';
             initDrag(div);
             map.appendChild(div);
         });
@@ -204,7 +143,6 @@
 
     function initDrag(el) {
         let x = 0, y = 0;
-
         el.addEventListener('mousedown', start);
         el.addEventListener('touchstart', start, {passive: false});
 
@@ -225,8 +163,14 @@
             const dx = x - cx;
             const dy = y - cy;
             x = cx; y = cy;
-            el.style.top = (el.offsetTop - dy) + "px";
-            el.style.left = (el.offsetLeft - dx) + "px";
+            
+            // Límites para que no se escapen del cuadro
+            let newTop = el.offsetTop - dy;
+            let newLeft = el.offsetLeft - dx;
+            const parent = el.parentElement;
+            
+            if(newTop > 0 && newTop < (parent.offsetHeight - el.offsetHeight)) el.style.top = newTop + "px";
+            if(newLeft > 0 && newLeft < (parent.offsetWidth - el.offsetWidth)) el.style.left = newLeft + "px";
         }
 
         function stop() {
@@ -236,8 +180,8 @@
     }
 
     function download() {
-        // Ocultamos controles un segundo para la foto
-        html2canvas(document.getElementById('export-area'), { backgroundColor: "#fdfaf5" }).then(canvas => {
+        const area = document.getElementById('export-area');
+        html2canvas(area, { backgroundColor: "#fdfaf5", scale: 2 }).then(canvas => {
             const a = document.createElement('a');
             a.download = 'ideologia-grupo.png';
             a.href = canvas.toDataURL();
