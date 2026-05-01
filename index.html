@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Axial: El Juego del Grupo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { --bg: #f8fafc; --primary: #1e293b; --accent: #3b82f6; }
+        body { font-family: sans-serif; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 700px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .setup { margin-bottom: 20px; text-align: center; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 60%; }
+        button { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; }
+        
+        /* El Mapa */
+        #capture-area { position: relative; width: 100%; aspect-ratio: 1 / 1; background: #fff; border: 2px solid #333; margin: 20px 0; overflow: hidden; }
+        .axis-x { position: absolute; top: 50%; width: 100%; height: 2px; background: #333; }
+        .axis-y { position: absolute; left: 50%; height: 100%; width: 2px; background: #333; }
+        .label { position: absolute; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        .p { top: 10px; left: 50%; transform: translateX(-50%); color: blue; }
+        .ap { bottom: 10px; left: 50%; transform: translateX(-50%); color: red; }
+        .izq { left: 10px; top: 50%; transform: translateY(-50%); }
+        .der { right: 10px; top: 50%; transform: translateY(-50%); }
+
+        /* Las fichas */
+        .chip { position: absolute; padding: 6px 12px; background: #3b82f6; color: white; border-radius: 20px; cursor: move; font-size: 13px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .inventory { display: flex; flex-wrap: wrap; gap: 8px; padding: 15px; border: 2px dashed #cbd5e1; border-radius: 8px; min-height: 50px; }
+        .controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="setup">
+        <h2>Mapa Político del Grupo</h2>
+        <input type="text" id="nameIn" placeholder="Nombre del amigo...">
+        <button onclick="add()">Añadir</button>
+    </div>
+
+    <div id="capture-area">
+        <div class="axis-x"></div><div class="axis-y"></div>
+        <div class="label p">Peronismo</div>
+        <div class="label ap">Antiperonismo</div>
+        <div class="label izq">Izquierda</div>
+        <div class="label der">Derecha</div>
+        </div>
+
+    <div class="inventory" id="box"></div>
+
+    <div class="controls">
+        <button style="background:#22c55e" onclick="save()">📸 Descargar Imagen</button>
+        <button style="background:#64748b" onclick="location.reload()">Limpiar todo</button>
+    </div>
+</div>
+
+<script>
+    function add() {
+        const val = document.getElementById('nameIn').value;
+        if(!val) return;
+        const div = document.createElement('div');
+        div.className = 'chip';
+        div.innerText = val;
+        div.style.position = 'relative'; // Empiezan en la caja
+        makeDrag(div);
+        document.getElementById('box').appendChild(div);
+        document.getElementById('nameIn').value = '';
+    }
+
+    function makeDrag(el) {
+        let x = 0, y = 0;
+        el.onmousedown = dragStart;
+        el.ontouchstart = dragStart;
+
+        function dragStart(e) {
+            e.preventDefault();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            x = clientX; y = clientY;
+            document.onmousemove = dragging;
+            document.ontouchmove = dragging;
+            document.onmouseup = () => document.onmousemove = document.onmouseup = null;
+            document.ontouchend = () => document.ontouchmove = document.ontouchend = null;
+            
+            // Si está en la caja, lo movemos al mapa para que sea absoluto
+            if(el.parentElement.id === 'box') {
+                const rect = el.getBoundingClientRect();
+                const map = document.getElementById('capture-area').getBoundingClientRect();
+                document.getElementById('capture-area').appendChild(el);
+                el.style.position = 'absolute';
+                el.style.left = (rect.left - map.left) + 'px';
+                el.style.top = (rect.top - map.top) + 'px';
+            }
+        }
+
+        function dragging(e) {
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            el.style.left = (el.offsetLeft + (clientX - x)) + 'px';
+            el.style.top = (el.offsetTop + (clientY - y)) + 'px';
+            x = clientX; y = clientY;
+        }
+    }
+
+    function save() {
+        html2canvas(document.getElementById('capture-area')).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'nuestro-mapa.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
+</body>
+</html>
