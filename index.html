@@ -2,201 +2,173 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Juego de las Ideologías</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            --bg-warm: #fdfaf5;
-            --accent: #7c9082; /* Verde musgo suave */
-            --text: #4a4a4a;
-            --card: #ffffff;
-            --shadow: 0 8px 30px rgba(0,0,0,0.05);
+            --bg: #fdfaf5;
+            --accent: #7c9082;
+            --text: #333;
+            --line: #d1d1d1;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; touch-action: manipulation; }
 
         body {
             font-family: 'Quicksand', sans-serif;
-            background-color: var(--bg-warm);
+            background-color: var(--bg);
             color: var(--text);
             margin: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .app-container {
-            width: 95%;
-            max-width: 800px;
-            background: var(--card);
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: var(--shadow);
+        h1 { font-weight: 700; margin: 20px 0; font-size: 1.5rem; }
+
+        /* Pantalla 1 */
+        #screen-setup {
+            width: 90%;
+            max-width: 400px;
             text-align: center;
-        }
-
-        h1 { font-weight: 700; color: var(--text); margin-bottom: 30px; font-size: 2.2rem; }
-
-        /* Pantalla 1: Ingreso de Nombres */
-        #screen-setup .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        input {
-            padding: 15px 20px;
-            border: 2px solid #eee;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 300px;
-            font-family: inherit;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        input:focus { border-color: var(--accent); }
-
-        button {
-            padding: 15px 25px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        button:active { transform: scale(0.95); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .name-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin: 20px 0;
-            min-height: 50px;
-        }
-
-        .name-tag {
-            background: #f0f0f0;
-            padding: 8px 15px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        /* Pantalla 2: El Juego */
-        #screen-game { display: none; }
-
-        #map-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background: white;
-            margin: 40px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* La Cruz central */
-        .cross-x { position: absolute; width: 100%; height: 1px; background: #d1d1d1; }
-        .cross-y { position: absolute; height: 100%; width: 1px; background: #d1d1d1; }
-
-        /* Etiquetas de los ejes - Posicionadas para no pisar la cruz */
-        .label {
-            position: absolute;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888;
-        }
-
-        .label.top { top: -30px; color: #4a90e2; } /* Azul suave */
-        .label.bottom { bottom: -30px; color: #e67e22; } /* Naranja suave */
-        .label.left { left: -80px; }
-        .label.right { right: -80px; }
-
-        /* Fichas arrastrables */
-        .player-chip {
-            position: absolute;
-            padding: 10px 18px;
-            background: var(--card);
-            border: 2px solid var(--accent);
-            color: var(--text);
-            border-radius: 50px;
-            cursor: grab;
-            font-weight: 600;
-            white-space: nowrap;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            user-select: none;
-            z-index: 10;
-        }
-
-        .player-chip:active { cursor: grabbing; transform: scale(1.05); }
-
-        .footer-controls {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
             margin-top: 50px;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
-            .label.left { left: 0; top: 45%; }
-            .label.right { right: 0; top: 45%; }
-            .app-container { padding: 20px; }
-            h1 { font-size: 1.5rem; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
+        input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            flex-grow: 1;
+            font-family: inherit;
         }
+
+        .name-tag {
+            display: inline-block;
+            background: #eee;
+            padding: 5px 12px;
+            border-radius: 8px;
+            margin: 4px;
+            font-size: 0.9rem;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Pantalla 2: El Juego */
+        #screen-game { 
+            display: none; 
+            width: 100vw; 
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            background: var(--bg);
+        }
+
+        #export-area {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 80px); /* Espacio para botones abajo */
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* El Mapa (Cruz) */
+        .map-wrapper {
+            position: relative;
+            width: 85vw;
+            height: 85vw;
+            max-width: 600px;
+            max-height: 600px;
+        }
+
+        .axis-h { position: absolute; top: 50%; width: 100%; height: 2px; background: var(--line); z-index: 1; }
+        .axis-v { position: absolute; left: 50%; height: 100%; width: 2px; background: var(--line); z-index: 1; }
+
+        /* Etiquetas fuera de los ejes */
+        .label {
+            position: absolute;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #999;
+            z-index: 2;
+        }
+        .top { top: -25px; left: 50%; transform: translateX(-50%); color: #4a90e2; }
+        .bottom { bottom: -25px; left: 50%; transform: translateX(-50%); color: #e67e22; }
+        .left { left: -10px; top: 50%; transform: translate(-100%, -50%); }
+        .right { right: -10px; top: 50%; transform: translate(100%, -50%); }
+
+        /* Fichas */
+        .player-chip {
+            position: absolute;
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: move;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            white-space: nowrap;
+            touch-action: none; /* BLOQUEA EL SCROLL AL MOVER */
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .btn-small { padding: 10px 15px; font-size: 0.8rem; background: #555; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div id="screen-setup">
     <h1>Juego de las ideologías</h1>
-
-    <div id="screen-setup">
-        <p>Introduce los nombres de los integrantes del grupo</p>
-        <div class="input-group">
-            <input type="text" id="nameInput" placeholder="Ej: Juan" onkeypress="if(event.key==='Enter') addName()">
-            <button onclick="addName()">Añadir</button>
-        </div>
-        <div class="name-list" id="nameList"></div>
-        <button id="btnStart" style="margin-top: 20px; background: #4a4a4a; min-width: 200px;" onclick="startGame()" disabled>Empezar</button>
+    <div class="input-group">
+        <input type="text" id="nameInput" placeholder="Nombre...">
+        <button onclick="addName()">+</button>
     </div>
+    <div id="nameList" style="margin-bottom: 20px;"></div>
+    <button id="btnStart" onclick="startGame()" style="width:100%" disabled>Empezar Juego</button>
+</div>
 
-    <div id="screen-game">
-        <div id="export-area" style="padding: 40px; background: white;">
-            <h2 id="game-title" style="margin-top:0; color: #4a4a4a;">Nuestra Ideología</h2>
-            <div id="map-container">
-                <div class="cross-x"></div>
-                <div class="cross-y"></div>
-                
-                <div class="label top">Peronismo</div>
-                <div class="label bottom">Antiperonismo</div>
-                <div class="label left">Izquierda</div>
-                <div class="label right">Derecha</div>
-                
-                </div>
+<div id="screen-game">
+    <div id="export-area">
+        <div class="map-wrapper" id="map">
+            <div class="axis-h"></div>
+            <div class="axis-v"></div>
+            <div class="label top">Peronismo</div>
+            <div class="label bottom">Antiperonismo</div>
+            <div class="label left">Izquierda</div>
+            <div class="label right">Derecha</div>
         </div>
-
-        <div class="footer-controls">
-            <button onclick="downloadImage()" style="background: #7c9082;">📸 Guardar y Compartir</button>
-            <button onclick="location.reload()" style="background: #e5e5e5; color: #666;">Reiniciar</button>
-        </div>
+    </div>
+    
+    <div class="controls">
+        <button onclick="download()">📸 Guardar Imagen</button>
+        <button class="btn-small" onclick="location.reload()">Reiniciar</button>
     </div>
 </div>
 
@@ -205,87 +177,71 @@
 
     function addName() {
         const input = document.getElementById('nameInput');
-        const name = input.value.trim();
-        if (name && !players.includes(name)) {
-            players.push(name);
-            renderNames();
+        const n = input.value.trim();
+        if(n) {
+            players.push(n);
+            document.getElementById('nameList').innerHTML += `<span class="name-tag">${n}</span>`;
             input.value = '';
             document.getElementById('btnStart').disabled = false;
         }
     }
 
-    function renderNames() {
-        const list = document.getElementById('nameList');
-        list.innerHTML = players.map(p => `<div class="name-tag">${p}</div>`).join('');
-    }
-
     function startGame() {
         document.getElementById('screen-setup').style.display = 'none';
-        const gameScreen = document.getElementById('screen-game');
-        gameScreen.style.display = 'block';
+        document.getElementById('screen-game').style.display = 'block';
+        const map = document.getElementById('map');
         
-        const container = document.getElementById('map-container');
-        
-        players.forEach((name, index) => {
-            const chip = document.createElement('div');
-            chip.className = 'player-chip';
-            chip.innerText = name;
-            
-            // Posición inicial aleatoria cerca del centro para que no se pisen
-            const offset = (index * 15) % 50;
-            chip.style.left = `calc(50% - 40px + ${offset}px)`;
-            chip.style.top = `calc(50% - 20px + ${offset}px)`;
-            
-            makeDraggable(chip);
-            container.appendChild(chip);
+        players.forEach((name, i) => {
+            const div = document.createElement('div');
+            div.className = 'player-chip';
+            div.innerText = name;
+            div.style.left = '40%';
+            div.style.top = (20 + (i * 40)) + 'px'; // Los apila un poco al inicio
+            initDrag(div);
+            map.appendChild(div);
         });
     }
 
-    function makeDraggable(el) {
-        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        
-        el.onmousedown = dragMouseDown;
-        el.ontouchstart = dragMouseDown;
+    function initDrag(el) {
+        let x = 0, y = 0;
 
-        function dragMouseDown(e) {
-            e = e || window.event;
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
-            pos3 = clientX;
-            pos4 = clientY;
-            document.onmouseup = closeDragElement;
-            document.ontouchend = closeDragElement;
-            document.onmousemove = elementDrag;
-            document.ontouchmove = elementDrag;
+        el.addEventListener('mousedown', start);
+        el.addEventListener('touchstart', start, {passive: false});
+
+        function start(e) {
+            e.preventDefault();
+            const cx = e.clientX || e.touches[0].clientX;
+            const cy = e.clientY || e.touches[0].clientY;
+            x = cx; y = cy;
+            document.onmousemove = move;
+            document.ontouchmove = move;
+            document.onmouseup = stop;
+            document.ontouchend = stop;
         }
 
-        function elementDrag(e) {
-            e = e || window.event;
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
-            pos1 = pos3 - clientX;
-            pos2 = pos4 - clientY;
-            pos3 = clientX;
-            pos4 = clientY;
-            el.style.top = (el.offsetTop - pos2) + "px";
-            el.style.left = (el.offsetLeft - pos1) + "px";
+        function move(e) {
+            const cx = e.clientX || e.touches[0].clientX;
+            const cy = e.clientY || e.touches[0].clientY;
+            const dx = x - cx;
+            const dy = y - cy;
+            x = cx; y = cy;
+            el.style.top = (el.offsetTop - dy) + "px";
+            el.style.left = (el.offsetLeft - dx) + "px";
         }
 
-        function closeDragElement() {
-            document.onmouseup = null;
-            document.onmousemove = null;
-            document.ontouchend = null;
-            document.ontouchmove = null;
+        function stop() {
+            document.onmousemove = document.onmouseup = null;
+            document.ontouchmove = document.ontouchend = null;
         }
     }
 
-    function downloadImage() {
-        const area = document.getElementById('export-area');
-        html2canvas(area, { backgroundColor: "#ffffff" }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'juego-ideologias.png';
-            link.href = canvas.toDataURL();
-            link.click();
+    function download() {
+        // Ocultamos controles un segundo para la foto
+        html2canvas(document.getElementById('export-area'), { backgroundColor: "#fdfaf5" }).then(canvas => {
+            const a = document.createElement('a');
+            a.download = 'ideologia-grupo.png';
+            a.href = canvas.toDataURL();
+            a.click();
         });
     }
 </script>
